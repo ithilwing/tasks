@@ -3,41 +3,41 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-const int CHAR_NUMBER = 2;
+const int CHAR_NUMBER = 6;
 const int BITS_PER_CHAR = 8;
-
-int main () {
-        int trans_pid = 0;
-        int rec_pid = 0;
-	int i = 0;
-	int j = 0;
+//RECIEVER//
+int main() {
+    int trans_pid, rec_pid;
 	char msg[CHAR_NUMBER];
-	char msg_bin_letter[BITS_PER_CHAR];
+    int msg_bin_letter[BITS_PER_CHAR * CHAR_NUMBER];
 
-        rec_pid = getpid ();
-        printf ("my pid is %d, i am a reciever\n", rec_pid);
-        scanf ("%d", &trans_pid);
-        printf ("the transmitter's pid id %d\n", trans_pid);
+    rec_pid = getpid();
+    printf("my pid is %d, i am a reciever\n", rec_pid);
+    scanf("%d", &trans_pid);
+    printf("the transmitter's pid id %d\n", trans_pid);
 
+    getchar();
 
-	for (i = 0; i < CHAR_NUMBER; msg[i] = '\0', i++);
+    int i, j;
 
-        for (i = 0; i < CHAR_NUMBER; i++){
-	        msg[i] = getchar();
+    for (i = 0; i < CHAR_NUMBER; i++) {
+	        scanf("%c", &msg[i]);
 	}
-
 		
-	for (i = 0; i < CHAR_NUMBER; i++){
-		for (j = 0; j < BITS_PER_CHAR; j++){
-			msg_bin_letter[j] = msg[i] % 2;
-			msg[i] >>= 1;
-			printf("%d", msg_bin_letter[j]); 
-		}
-				
-	
+	for (i = 0; i < CHAR_NUMBER; i++) {
+        int current_msg = (int) msg[i];
+		for (j = BITS_PER_CHAR * (i + 1) - 1; j >= BITS_PER_CHAR * i; j--) {
+			msg_bin_letter[j] = current_msg % 2;
+			current_msg >>= 1;
+        }
 	}
 	
-return 0;
+    for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
+        printf("%d", msg_bin_letter[i]);
+    }
 
+    printf("\n");
+
+    return 0;
 }
 
