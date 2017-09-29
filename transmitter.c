@@ -5,16 +5,23 @@
 
 const int CHAR_NUMBER = 1;
 const int BITS_PER_CHAR = 8;
+int k = 1;
+void wait() {
+	k = 0;
+}
+
 //TRANSMITTER//
 int main() {
     int trans_pid, rec_pid;
 	char msg[CHAR_NUMBER];
     int msg_bin_letter[BITS_PER_CHAR * CHAR_NUMBER];
 
-    rec_pid = getpid();
-    printf("my pid is %d, i am a reciever\n", rec_pid);
-    scanf("%d", &trans_pid);
-    printf("the transmitter's pid is %d\n", trans_pid);
+	signal(SIGUSR1, wait);
+
+    trans_pid = getpid();
+    printf("my pid is %d, i am a transmitter\n", trans_pid);
+    scanf("%d", &rec_pid);
+    printf("the reciever's pid is %d\n", rec_pid);
 
     getchar();
 
@@ -32,19 +39,23 @@ int main() {
         }
 	}
 	
-    for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
+  /*  for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
         printf("%d", msg_bin_letter[i]);
     }
 
     printf("\n");
+*/
 
-/*	for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
-		if (msg_bin_letter[i] == 1)
-			kill (rec_pid, SIGUSR10);
+	for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
+		if (msg_bin_letter[i] == 1){
+			kill (rec_pid, SIGUSR1);
+		}
 		else
-			kill (rec_pid, SIGUSR12);
-	
-	}*/
+			kill (rec_pid, SIGUSR2);
+		while (k != 0){
+		}	
+		k = 1;	
+	}
 
     return 0;
 }
