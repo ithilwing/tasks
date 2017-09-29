@@ -7,32 +7,19 @@
 char recieved_msg[CHAR_NUMBER * BITS_PER_CHAR];
 //char recieved_msg[CHAR_NUMBER];
 int bit_pointer = 0;
-int k = 1;
+int k = 0;
 int trans_pid, rec_pid;
 
 
 
 //1
 void sig1_handler () {	
-	recieved_msg[bit_pointer] = '1';
-	bit_pointer++;
-	printf("bit_pointer ++");
-	kill(trans_pid, SIGUSR1);
-	if (bit_pointer = CHAR_NUMBER * BITS_PER_CHAR - 1)
-		k = 0;
+	k = 1;
 }
 //0
 void sig2_handler (){
-	recieved_msg[bit_pointer] = '0';
-	bit_pointer++;
-        printf("bit_pointer ++");
-	kill(trans_pid, SIGUSR1);
-        if (bit_pointer = CHAR_NUMBER * BITS_PER_CHAR - 1)
-	        k = 0;
-
+	k = 2;
 }
-
-
 
 int main() {
 //	char recieved_msg[CHAR_NUMBER * BITS_PER_CHAR];
@@ -48,13 +35,41 @@ int main() {
     int pow2 = 1;
     int msg_dec = 0;
     int signo;
-
+    int flag = 0;
 
 	signal(SIGUSR1, sig1_handler);
 	signal(SIGUSR2, sig2_handler);
-		
-	while (k != 0){
+	
+	while(1){
+		switch(k){
+			case 0:
+				 break;
+			case 1:
+				        recieved_msg[bit_pointer] = '1';
+			               bit_pointer++;
+			               printf("bit_pointer ++");
+				       if (bit_pointer = CHAR_NUMBER * BITS_PER_CHAR - 1){
+                				 k = 0;
+						 flag = 1;
+				       }
+      					kill(trans_pid, SIGUSR1);
+					break;
+			case 2:
+				        recieved_msg[bit_pointer] = '0';
+				        bit_pointer++;
+				        printf("bit_pointer ++");
+				        if (bit_pointer = CHAR_NUMBER * BITS_PER_CHAR - 1){
+				                k = 0;
+						flag = 1;
+					}
+				        kill(trans_pid, SIGUSR1);
+					break;
+
+		}
+	if (flag == 1) break;
 	}
+
+
 	for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++){
 		printf("OK %c\n", recieved_msg[i]);
 	}
