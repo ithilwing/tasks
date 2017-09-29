@@ -45,20 +45,20 @@ int main() {
 			case 0:
 				 break;
 			case 1:
+                                       bit_pointer++;
 				        recieved_msg[bit_pointer] = '1';
-			               bit_pointer++;
-			               printf("bit_pointer ++");
-				       if (bit_pointer = CHAR_NUMBER * BITS_PER_CHAR - 1){
+			               printf("bit_pointer ++\n");
+				       if (bit_pointer == CHAR_NUMBER * BITS_PER_CHAR - 1){
                 				 k = 0;
 						 flag = 1;
 				       }
       					kill(trans_pid, SIGUSR1);
 					break;
 			case 2:
+                                       bit_pointer++;
 				        recieved_msg[bit_pointer] = '0';
-				        bit_pointer++;
 				        printf("bit_pointer ++");
-				        if (bit_pointer = CHAR_NUMBER * BITS_PER_CHAR - 1){
+				        if (bit_pointer == CHAR_NUMBER * BITS_PER_CHAR - 1){
 				                k = 0;
 						flag = 1;
 					}
