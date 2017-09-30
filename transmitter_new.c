@@ -39,19 +39,22 @@ int main() {
         }
 	}
 	
-  /*  for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
+   for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
         printf("%d", msg_bin_letter[i]);
     }
 
     printf("\n");
-*/
+
 
 	for (i = 0; i < CHAR_NUMBER * BITS_PER_CHAR; i++) {
-		if (msg_bin_letter[i] == 1){
+		if (msg_bin_letter[i] == 0){
 			kill (rec_pid, SIGUSR1);
+			printf("sent 0\n");
 		}
-		else
+		else{
 			kill (rec_pid, SIGUSR2);
+			printf("sent 1\n");
+		}
 		while (k != 0){
 		}	
 		k = 1;	
