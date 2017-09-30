@@ -46,7 +46,7 @@ int main() {
 				 break;
 			case 1:
                                        bit_pointer++;
-				        recieved_msg[bit_pointer] = '1';
+				        recieved_msg[bit_pointer - 1] = '1';
 			               printf("bit_pointer ++\n");
 				       if (bit_pointer == CHAR_NUMBER * BITS_PER_CHAR - 1){
                 				 k = 0;
@@ -56,7 +56,7 @@ int main() {
 					break;
 			case 2:
                                        bit_pointer++;
-				        recieved_msg[bit_pointer] = '0';
+				        recieved_msg[bit_pointer - 1] = '0';
 				        printf("bit_pointer ++");
 				        if (bit_pointer == CHAR_NUMBER * BITS_PER_CHAR - 1){
 				                k = 0;
