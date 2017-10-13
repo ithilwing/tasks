@@ -12,10 +12,10 @@ typedef enum{
 	DONE
 }statuses;
 
-//typedef struct{
-//	int counter;
-//	pthread_t name;
-//}personal;
+typedef struct{
+	int counter;
+	pthread_t name;
+}personal;
 
 typedef struct{
 	int duration;
@@ -30,14 +30,15 @@ pthread_mutex_t lock;
 
 task_t tasks[TASK_N];
 pthread_t thread_id[THREADS_N];
-//personal worker_id[THREADS_N];
+personal worker_id[THREADS_N];
 //long int pthread_self[THREADS_N];
 
-void* func(void* dummy){
-//	int* t;
-//	t = (int*) j;
-  //     	int z = *t;	
+void* func(void* g){
+	int* t;
+	t = (int*) g;
+   	int z = *t;	
 	int i;
+	printf("z = %d\n", z);
 //	for(i = 0; i < THREADS_N; i++){	
 //		pthread_self[i] = pthread_self();
 //	}
@@ -57,17 +58,18 @@ void* func(void* dummy){
 		usleep(tasks[i].duration);
 		tasks[i].counter++;
 		tasks[i].status = 2;
-		
-		printf("Worker %ld has finished task %d\n", pthread_self(), tasks[i].id );
 //		worker_id[z].counter++;
-//		printf("counter is %d/n", worker_id[z].counter);
+ //               printf("counter is %d\n", worker_id[z].counter);
+	//	printf("Worker %ld has finished task %d\n", pthread_self(), tasks[i].id );
+		worker_id[z].counter++;
+//		printf("counter is %d\n", worker_id[z].counter);
 		}
 	}
         return NULL;
 }       
 
 int main(){
-	int i, k, j;
+	int i, k=0, g=0;
 	int thread_res;
 	for(i = 0; i < TASK_N; i++){
 		tasks[i].status = 0;
@@ -76,8 +78,11 @@ int main(){
 		tasks[i].counter = 0;
 	}
 	for(i = 0; i < THREADS_N; i ++){
-		thread_res = pthread_create(&thread_id[i], NULL, func, NULL);
-//		worker_id[j].name = j;
+		g = i;
+		printf("g = %d\n", g);
+		thread_res = pthread_create(&thread_id[i], NULL, func, (int*)&g);
+		worker_id[i].name = i;
+		worker_id[i].counter = 0;
 	}
 	if(thread_res){
 		printf("Can not create thread\n");
@@ -93,8 +98,10 @@ int main(){
         for(i = 0; i < TASK_N; i++){
 	        k = tasks[i].counter + k;
 	}
-	        printf("Task was done %d times\n", k);
-	
+	printf("Task was done %d times\n", k);
+	for(i = 0; i < THREADS_N; i++){
+		printf("worker No %ld has done %d tasks\n", worker_id[i].name, worker_id[i].counter);
+	}	
 
 
 	return 0;
