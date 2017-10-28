@@ -43,12 +43,6 @@ int main()
 		exit(-1);
 	}
 
-	if((final_number = (int *)shmat(shmid, NULL, 0)) == (int *)(-1)){
-	printf("Can't attach shared memory\n");
-	exit(-1);
-
-	}
-
 	
 //	mybuf.sem_op = -1;
 //	mybuf.sem_flg = 0;
@@ -67,12 +61,12 @@ int main()
 
 	printf("so what's next?\n");
 	
-	int a = *get_number;
+	int a = get_number[0];
 	int b = a * a;
 //	*final_number = (*get_number) * (*get_number);
-	*final_number = b;
-	printf("%d\n", *final_number);
-	printf("%d\n", *final_number);
+	get_number[1] = b;
+	printf("%d\n", b);
+//	printf("%d\n", *final_number);
 //	printf("%d\n", b);
 	
 	
@@ -89,11 +83,6 @@ int main()
 
 
 	if(shmdt(get_number) < 0){
-		printf("Can't detach shared memory\n");
-		exit(-1);
-	}
-
-	if(shmdt(final_number) < 0){
 		printf("Can't detach shared memory\n");
 		exit(-1);
 	}

@@ -42,10 +42,6 @@ int main() {
 		exit(-1);
 	}
 
-	if((final_number = (int *)shmat(shmid, NULL, 0)) == (int *)(-1)){
-	printf("Can't attach shared memory\n");
-	exit(-1);
-	}
 //              scanf("%d", get_number); 	
 
 //	mybuf.sem_op = 1;
@@ -58,8 +54,7 @@ int main() {
 //	mybuf.sem_flg = 0;
 //	mybuf.sem_num = 0;
 	
-	*final_number = 0;
-	scanf("%d", get_number); 
+	scanf("%d", &get_number[0]); 
 	mybuf.sem_op = 1;
 	mybuf.sem_flg = 0;
 	mybuf.sem_num = 1;
@@ -78,17 +73,11 @@ int main() {
 		exit(-1);
 	}
 	printf("wait\n");
-	printf("%d\n", *get_number);
-	printf("number is %d\n", *final_number);
+	printf("%d\n", get_number[1]);
 
 
 	if (shmdt(get_number) < 0) {
 		printf("Can't detach shared memory\n");
-		exit(-1);
-	}
-
-	if(shmdt(final_number) < 0){
-		printf("Cant't detach shared memory\n");
 		exit(-1);
 	}
 
