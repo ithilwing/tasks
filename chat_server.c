@@ -48,6 +48,14 @@ void* client( void* void_thread_args) {
 	int n;
 	char buffer_in[256];
 	char buffer_out[256];
+	sprintf(buffer_out, "Client %d has connected", my_client->client_number);// закидываем строку о том что клиент подключился
+	for (int j = 0; j < N_CLIENTS; j++){ // кидаем её по всем серверам
+		if (thread_args[j]){
+			n  = write(thread_args[j]->client_fd, buffer_out, 256);
+		}
+	}
+
+	bzero(buffer_out, 256);
 
 	while(1){
 		n = read(my_client->client_fd, buffer_in, 255); //читаем из буфера клиента
