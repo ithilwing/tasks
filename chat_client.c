@@ -17,8 +17,20 @@ void error (char *msg){
 	exit(0);
 }
 
+void* message_reading (void* args){
+
+	char buffer_from_server[256];
+	int n;
+	n = read(sockfd, buffer_from_server, 255);
+	if (n < 0)
+		error("ERROR reading from socket");
+
+}
+
+
 int main(int argc, char *argv[]){
-	int sockfd, portno, n;
+	int portno, n;
+	int sockfd;
 
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
@@ -51,6 +63,11 @@ int main(int argc, char *argv[]){
 
 	if(connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 		error("ERROR connecting");
+	
+	pthread_t thread;
+	int thread_result;
+	thread_result = pthread_create(&thread, NULL, &message_reading, &sockfd);
+
         while(1){
 
 		printf("Please enter the message: ");
@@ -60,22 +77,23 @@ int main(int argc, char *argv[]){
 
 		n = write(sockfd, buffer, strlen(buffer));
 
+
 		if (n < 0)
 			error("ERROR writing to socket");
 
 		bzero(buffer, 256);
 
-		n = read(sockfd, buffer, 255);
+//		n = read(sockfd, buffer, 255);
 
 
-		if (n < 0)
-			error("ERROR reading from socket");
+//		if (n < 0)
+//			error("ERROR reading from socket");
 
 	/*	if (buffer[0] == '!'){
 			printf("You have disconnected");
 			break;
 		}*/
-		printf("%s\n", buffer);
+//		printf("%s\n", buffer);
 	}
 	return 0;
 }
