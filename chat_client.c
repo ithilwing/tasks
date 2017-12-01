@@ -1,4 +1,7 @@
 //CLIENT// 
+//
+//ЗАПУСК КЛИЕНТА: gcc chat_client.c -o client -lpthread
+//                ./client localhost nnnn - номер хоста, на котором запустили сервер. 5000, например
 
 
 #include <stdio.h>
@@ -10,21 +13,30 @@
 #include <strings.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
 
+/*пыталась сделать одновременно с посылом сообщений (в мейне) отдельным параллельным тредом тупо чтение всего, что приходит от сервера. Получается криво, но сообщения в тредах все появляются. Если не обращать внимания на please enter ur msg в неожиданных местах и мусора. Но надо исправлять */
 
 void error (char *msg){
 	perror(msg);
 	exit(0);
 }
 
-void* message_reading (void* args){
+/*функция от треда, тупо чтение и вывод всего */
 
+void* message_reading (void *args){ // закинули аргументом файлдескриптор слиента
+
+	while(1){
+	
+	int * new_args = (int*)args;
+	int newsockfd = *new_args;
 	char buffer_from_server[256];
 	int n;
-	n = read(sockfd, buffer_from_server, 255);
+	n = read(newsockfd, buffer_from_server, 255); // прочитали всё что есть в буфере
+	printf("%s\n", buffer_from_server); // вывели
 	if (n < 0)
 		error("ERROR reading from socket");
-
+	}
 }
 
 
@@ -68,6 +80,8 @@ int main(int argc, char *argv[]){
 	int thread_result;
 	thread_result = pthread_create(&thread, NULL, &message_reading, &sockfd);
 
+/*Вот тут короче надо просто повозиься с корректным отображением pls enter ur msg */
+
         while(1){
 
 		printf("Please enter the message: ");
@@ -82,18 +96,6 @@ int main(int argc, char *argv[]){
 			error("ERROR writing to socket");
 
 		bzero(buffer, 256);
-
-//		n = read(sockfd, buffer, 255);
-
-
-//		if (n < 0)
-//			error("ERROR reading from socket");
-
-	/*	if (buffer[0] == '!'){
-			printf("You have disconnected");
-			break;
-		}*/
-//		printf("%s\n", buffer);
 	}
 	return 0;
 }
