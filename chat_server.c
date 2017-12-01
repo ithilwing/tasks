@@ -36,14 +36,14 @@ void add_client (thread_args_t *added_client){
 	}
 }
 
-void send_message (char *s){
+/*void send_message (char *s){
 	int i;
 	for (i = 0; i < N_CLIENTS; i++){
 		if(thread_args[i]){
 			write(thread_args[i]->client_fd, s, strlen(s));
 		}
 	}
-}
+}*/
 	
 
 void* client( void* void_thread_args) {
@@ -54,16 +54,24 @@ void* client( void* void_thread_args) {
 	char buffer_in[256];
 	char buffer_out[256];
 //	printf("%d\n", my_client->client_number);
+//
 	while(1){
-		n = read(my_client->client_fd, buffer_in, 255);
-		printf("Client %d: %s\n",my_client->client_number, buffer_in);
+		n = read(my_client->client_fd, buffer_in, 255); //читаем из буфера клиента
+		printf("Client %d: %s\n",my_client->client_number, buffer_in); // печатаем это всё
 
 		if (n < 0)
 			error("ERROR reading from socket");
 
 //		printf( "%s\n", buffer);
-//
-		send_message(buffer_out);
+		sprintf(buffer_out, "%s", buffer_in); // в буфер на отправку забиваем эту строку (потом там будет имя приславшего клиента)
+
+		int k;
+		for (k = 0; k < N_CLIENTS; k++){
+			if (thread_args[k]){ //thread_args[] - массив указателей на структуру с аргументами, передаваемыми в тред
+				printf("sending...\n");
+				n = write(thread_args[k]->client_fd, buffer_out, 256);	// печатаем в буферы всех клиентов сообщение 
+			}
+		}
 
 //		n = write(my_client->client_fd, buffer, 255);
 
@@ -95,7 +103,7 @@ int main(){
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 
 //	portno = atoi(argv[1]);
-	portno = 8002;
+	portno = 8005;
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
