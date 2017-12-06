@@ -13,6 +13,10 @@
 #include <string.h>
 
 #define N_CLIENTS 50
+#define NMAX 300
+
+char buffer_in[NMAX];
+char buffer_out[NMAX];
 
 
 /* структура со всем хозяйством клиента */
@@ -45,13 +49,13 @@ void add_client (thread_args_t *added_client){
 
 void* client( void* void_thread_args) {
 	thread_args_t *my_client = (thread_args_t *)void_thread_args; // приводим типа, чтобы далее использовать my_client->
-	int n;
-	char buffer_in[256];
-	char buffer_out[256];
+	int n, j;
+//	char buffer_in[256];
+//	char buffer_out[256];
 	sprintf(buffer_out, "Client %d has connected", my_client->client_number);// закидываем строку о том что клиент подключился
-	for (int j = 0; j < N_CLIENTS; j++){ // кидаем её по всем серверам
+	for (j = 0; j < N_CLIENTS; j++){ // кидаем её по всем серверам
 		if (thread_args[j]){
-			n  = write(thread_args[j]->client_fd, buffer_out, 256);
+			n  = write(thread_args[j]->client_fd, buffer_out, strlen(buffer_out)+1);
 		}
 	}
 
@@ -59,6 +63,7 @@ void* client( void* void_thread_args) {
 
 	while(1){
 		n = read(my_client->client_fd, buffer_in, 255); //читаем из буфера клиента
+		buffer_in[n] = 0;
 		printf("Client %d: %s\n",my_client->client_number, buffer_in); // печатаем это всё
 
 		if (n < 0)
@@ -71,7 +76,7 @@ void* client( void* void_thread_args) {
 		for (k = 0; k < N_CLIENTS; k++){
 			if (thread_args[k]){ //thread_args[] - массив указателей на структуру с аргументами, передаваемыми в тред
 				printf("sending to client [%d]...\n", thread_args[k]->client_number);
-				n = write(thread_args[k]->client_fd, buffer_out, 256);	// печатаем в буферы всех клиентов сообщение 
+				n = write(thread_args[k]->client_fd, buffer_out, strlen(buffer_out) + 1);	// печатаем в буферы всех клиентов сообщение 
 			}
 		}
 
