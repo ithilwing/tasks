@@ -88,11 +88,21 @@ int main(int argc, char *argv[]){
 	int thread_result;
 	thread_result = pthread_create(&thread, NULL, &message_reading, &sockfd);
 
+	printf("Enter your nickname: ");
+	scanf("%s", buffer);
+	n = write(sockfd, buffer, strlen(buffer) + 1);
+
+	if (n < 0)
+		error("ERROR writing to socket");
+
+	bzero(buffer, 256);
+
+
 /*Вот тут короче надо просто повозиься с корректным отображением pls enter ur msg */
 
         while(1){
 		sleep(1);
-		printf("Please enter the message: \n");
+		printf("Please enter the message: ");
 		scanf("%s", buffer);
 
 		//bzero(buffer, 256);

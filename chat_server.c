@@ -11,18 +11,21 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
+#include <time.h>
 
 #define N_CLIENTS 50
 #define NMAX 300
 
 char buffer_in[NMAX];
 char buffer_out[NMAX];
+char client_name[NMAX];
 
 
 /* структура со всем хозяйством клиента */
 typedef struct{
        	int client_number;
 	int client_fd;
+	char client_nickname[50];
 }thread_args_t;
 
 pthread_t threadID[N_CLIENTS];
@@ -50,9 +53,21 @@ void add_client (thread_args_t *added_client){
 void* client( void* void_thread_args) {
 	thread_args_t *my_client = (thread_args_t *)void_thread_args; // приводим типа, чтобы далее использовать my_client->
 	int n, j;
+	long int s_time;
+	struct tm *m_time;
+	char str_t[128];
+
+	n = read(my_client->client_fd, buffer_in, 255);
+	buffer_in[n] = 0;
+	strcpy(my_client->client_nickname, buffer_in);
+
+	s_time = time (NULL);
+	m_time = localtime (&s_time);
+
+	strftime(str_t, 128, "%X", m_time);
 //	char buffer_in[256];
 //	char buffer_out[256];
-	sprintf(buffer_out, "Client %d has connected", my_client->client_number);// закидываем строку о том что клиент подключился
+	sprintf(buffer_out, "|%s| Client %d has connected. Welcome %s!", str_t, my_client->client_number, my_client->client_nickname);// закидываем строку о том что клиент подключился
 	for (j = 0; j < N_CLIENTS; j++){ // кидаем её по всем серверам
 		if (thread_args[j]){
 			n  = write(thread_args[j]->client_fd, buffer_out, strlen(buffer_out)+1);
@@ -64,13 +79,15 @@ void* client( void* void_thread_args) {
 	while(1){
 		n = read(my_client->client_fd, buffer_in, 255); //читаем из буфера клиента
 		buffer_in[n] = 0;
-		printf("Client %d: %s\n",my_client->client_number, buffer_in); // печатаем это всё
+		printf("Client %s: %s\n", my_client->client_nickname, buffer_in); // печатаем это всё
 
 		if (n < 0)
 			error("ERROR reading from socket");
-
+		s_time = time (NULL);
+		m_time = localtime (&s_time);
+		strftime(str_t, 128, "%X", m_time);
 //		printf( "%s\n", buffer);
-		sprintf(buffer_out, "[%d] %s",my_client->client_number, buffer_in); // в буфер на отправку забиваем эту строку (потом там будет имя приславшего клиента)
+		sprintf(buffer_out, "|%s| [%s]: %s", str_t, my_client->client_nickname, buffer_in); // в буфер на отправку забиваем эту строку (потом там будет имя приславшего клиента)
 
 		int k;
 		for (k = 0; k < N_CLIENTS; k++){
