@@ -14,13 +14,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+//#include <conio.h>
 
 #define NMAX 300
 
 char buffer_from_server[NMAX];
-/*пыталась сделать одновременно с посылом сообщений (в мейне) отдельным параллельным тредом тупо чтение всего, что приходит от сервера. Получается криво, но сообщения в тредах все появляются. Если не обращать внимания на please enter ur msg в неожиданных местах и мусора. Но надо исправлять */
-
-/* НАСЧЁТ МУСОРА - это должно исправиться, если учитывать как символы то ли пробел, то ли энтер. Но у меня уже нет времени */
 
 void error (char *msg){
 	perror(msg);
@@ -37,7 +35,7 @@ void* message_reading (void *args){ // закинули аргументом ф�
 //		char buffer_from_server[256];
 		int n;
 		if((n = read(newsockfd, buffer_from_server, 255)) <= 0){
-			printf("connection lost\n");
+			printf("Connection lost\n");
 			exit(0);
 			}		 // прочитали всё что есть в буфере
 		printf("%s\n", buffer_from_server); // вывели
@@ -47,6 +45,99 @@ void* message_reading (void *args){ // закинули аргументом ф�
 	}
 }
 
+int find_in_base(int found, char user_input[128]){
+	FILE *input = NULL;
+	char nickname[128];
+	char password[128];
+	char buffer[512];
+	int i = 0;
+	int length;
+
+//	printf("%d", found);
+	
+	input = fopen("/home/tatkirkar/tasks/tasks/clients_base.txt", "r");
+	if (input == NULL){
+		printf("ERROR opening file\n");
+	//	_getch();
+		exit(-2);
+	}
+
+	found = 0;
+	while(!feof(input)){
+		fgets(buffer, 511, input);
+//		printf("%s!\n", buffer);
+		length = strlen(buffer);
+		for (i = 0; i < length; i++){
+			if (buffer[i] == '\t'){
+				buffer[i] = '\0';
+				break;
+			}
+		}
+		strcpy(nickname, buffer);
+		strcpy(password, &buffer[i+1]);
+	
+//		printf("%s!\n", nickname);
+//		printf("%s!\n", password);
+//		printf("%s!\n", user_input);
+		if(!strcmp(nickname, user_input)){
+			found = 1;
+			break;
+		}
+		else found = 0;
+//		printf("%d\n", found);
+
+	}
+
+	return found; // если совпали, 1, если не совпали, 0
+}
+
+void add_to_base(char user_nickname[128], char user_password[128]){
+
+}
+
+int check_password(char user_nickname[128], char user_password[128]){
+	FILE *input = NULL;
+	char buffer[512];
+	char nickname[128];
+	char password[128];
+	char input_password[128];
+	int i = 0;
+	int f = 0;
+	int length;
+
+	input = fopen("/home/tatkirkar/tasks/tasks/clients_base.txt", "r");
+	if (input == NULL){
+		printf("ERROR opening file");
+		exit(-2);
+	}
+
+	while(!feof(input)){
+		fgets(buffer, 511, input);
+		length = strlen(buffer);
+		for (i = 0; i < length; i++){
+			if(buffer[i] == '\t'){
+				buffer[i] = '\0';
+			}
+		}
+
+		strcpy(nickname, buffer);
+		strcpy(password, &buffer[i+1]);
+//		sprintf(input_password, "%s\n", user_password);
+		
+		printf("%s and %s and %s and %s\n", nickname, password, user_nickname, user_password);
+		
+		if((!strcmp(password, user_password)) && (!strcmp(nickname, user_nickname))){
+			f = 1;
+			break;
+		}
+		else{
+			f = 0;
+			printf("Invalid password!\n");
+		}
+
+	}
+	return f;	
+}
 
 int main(int argc, char *argv[]){
 	int portno, n;
@@ -56,6 +147,8 @@ int main(int argc, char *argv[]){
 	struct hostent *server;
 
 	char buffer[NMAX];
+	char nickname[128];
+	char password[128];
 	if (argc < 3){
 		fprintf(stderr, "usage %s hostname port\n", argv[0]);
 		exit(0);
@@ -88,12 +181,37 @@ int main(int argc, char *argv[]){
 	int thread_result;
 	thread_result = pthread_create(&thread, NULL, &message_reading, &sockfd);
 
-	printf("Enter your nickname: ");
-	scanf("%s", buffer);
-	n = write(sockfd, buffer, strlen(buffer) + 1);
+        printf("Enter your nickname: ");
+	scanf("%s", nickname);
+
+	
+	int found = 0;
+	int f = find_in_base(found, nickname);
+	int counter = 0;
+
+	printf("%d\n", f);
+
+	if(f == 0){
+		printf("Oh, it seems you are new here... Enter your password:");
+		scanf("%s", password);
+		add_to_base(nickname, password);
+	}
+
+	else if(f == 1){
+		printf("got it\n");
+		int success = 0;
+		while(success == 0){
+			printf("Enter your password: ");
+			scanf("%s", password);
+			success = check_password(nickname, password);
+		}
+	}
+
+        n = write(sockfd, nickname, strlen(nickname) + 1);
 
 	if (n < 0)
 		error("ERROR writing to socket");
+	
 
 	bzero(buffer, 256);
 
