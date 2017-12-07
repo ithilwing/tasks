@@ -45,13 +45,24 @@ void* message_reading (void *args){ // закинули аргументом ф�
 	}
 }
 
+int count_lines(const char *filename){
+	int lines = 0;
+	int any;
+	FILE *f = fopen(filename, "r");
+	if (f == NULL) return -1;
+	while (any != EOF){
+		any = fgetc(f);
+		if (any == '\n') lines++;
+	}
+	fclose(f);
+	return lines;
+}
+
 int find_in_base(int found, char user_input[128]){
 	FILE *input = NULL;
 	char nickname[128];
 	char password[128];
-	char buffer[512];
 	int i = 0;
-	int length;
 
 //	printf("%d", found);
 	
@@ -61,21 +72,11 @@ int find_in_base(int found, char user_input[128]){
 	//	_getch();
 		exit(-2);
 	}
-
+	int n_lines = count_lines("/home/tatkirkar/tasks/tasks/clients_base.txt");
 	found = 0;
-	while(!feof(input)){
-		fgets(buffer, 511, input);
-//		printf("%s!\n", buffer);
-		length = strlen(buffer);
-		for (i = 0; i < length; i++){
-			if (buffer[i] == '\t'){
-				buffer[i] = '\0';
-				break;
-			}
-		}
-		strcpy(nickname, buffer);
-		strcpy(password, &buffer[i+1]);
 	
+	for (i = 0; i < n_lines; i++){
+		fscanf(input, "%s %s\n", nickname, password);
 //		printf("%s!\n", nickname);
 //		printf("%s!\n", password);
 //		printf("%s!\n", user_input);
@@ -92,18 +93,22 @@ int find_in_base(int found, char user_input[128]){
 }
 
 void add_to_base(char user_nickname[128], char user_password[128]){
-
+	FILE *input = NULL;
+	input = fopen("/home/tatkirkar/tasks/tasks/clients_base.txt", "a");
+	if (input == NULL){
+		printf("ERROR opening file\n");
+		exit(-2);
+	}
+	fprintf(input, "%s %s\n", user_nickname, user_password);
+	fclose(input);
 }
 
 int check_password(char user_nickname[128], char user_password[128]){
 	FILE *input = NULL;
-	char buffer[512];
 	char nickname[128];
 	char password[128];
-	char input_password[128];
 	int i = 0;
 	int f = 0;
-	int length;
 
 	input = fopen("/home/tatkirkar/tasks/tasks/clients_base.txt", "r");
 	if (input == NULL){
@@ -111,20 +116,12 @@ int check_password(char user_nickname[128], char user_password[128]){
 		exit(-2);
 	}
 
-	while(!feof(input)){
-		fgets(buffer, 511, input);
-		length = strlen(buffer);
-		for (i = 0; i < length; i++){
-			if(buffer[i] == '\t'){
-				buffer[i] = '\0';
-			}
-		}
+	int n_lines = count_lines("/home/tatkirkar/tasks/tasks/clients_base.txt");
 
-		strcpy(nickname, buffer);
-		strcpy(password, &buffer[i+1]);
-//		sprintf(input_password, "%s\n", user_password);
+	for (i = 0; i < n_lines; i++){
+		fscanf(input, "%s %s\n", nickname, password);
 		
-		printf("%s and %s and %s and %s\n", nickname, password, user_nickname, user_password);
+//		printf("%s and %s and %s and %s\n", nickname, password, user_nickname, user_password);
 		
 		if((!strcmp(password, user_password)) && (!strcmp(nickname, user_nickname))){
 			f = 1;
@@ -132,10 +129,10 @@ int check_password(char user_nickname[128], char user_password[128]){
 		}
 		else{
 			f = 0;
-			printf("Invalid password!\n");
 		}
 
 	}
+	if (f == 0) printf("Invalid password! ");
 	return f;	
 }
 
@@ -153,6 +150,7 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "usage %s hostname port\n", argv[0]);
 		exit(0);
 	}
+	
 
 	portno = atoi(argv[2]);
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -187,18 +185,16 @@ int main(int argc, char *argv[]){
 	
 	int found = 0;
 	int f = find_in_base(found, nickname);
-	int counter = 0;
 
-	printf("%d\n", f);
 
 	if(f == 0){
 		printf("Oh, it seems you are new here... Enter your password:");
 		scanf("%s", password);
+//		printf("%s %s\n", nickname, password);
 		add_to_base(nickname, password);
 	}
 
 	else if(f == 1){
-		printf("got it\n");
 		int success = 0;
 		while(success == 0){
 			printf("Enter your password: ");
